@@ -1,0 +1,4 @@
+.env
+messages.json
+__pycache__/
+*.pyc
