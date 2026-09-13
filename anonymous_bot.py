@@ -30,11 +30,20 @@ def save_messages(messages):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, 
-        "سلام! 👋\n\n"
-        "این یک بات پیام ناشناس هست.\n"
-        "هر پیامی بفرستید، بدون اینکه هویت شما مشخص باشه ارسال میشه.\n\n"
-        "پیام خودتون رو بنویسید:")
+    welcome_text = (
+        "سلام عزیزم 👋❤️\n\n"
+        "من الهام هستم و ادمین کانال Eroticx🔥\n\n"
+        "ازین به بعد از طریق این بات میتونید به صورت کاملاً ناشناس "
+        "عکس و ویدیو هاتون رو ارسال کنید.\n\n"
+        "📝 میتونید هم متن بنویسید\n"
+        "📷 عکس بفرستید\n"
+        "🎥 ویدیو بفرستید\n"
+        "📎 فایل بفرستید\n"
+        "🎤 صدا بفرستید\n\n"
+        "🔒 هویت شما کاملاً محفوظه!\n\n"
+        "هرچی می‌خواید بفرستید 👇"
+    )
+    bot.reply_to(message, welcome_text)
 
 @bot.message_handler(content_types=['photo'])
 def handle_photo(message):
