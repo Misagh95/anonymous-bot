@@ -9,6 +9,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OWNER_CHAT_ID = os.getenv("OWNER_CHAT_ID")
+CHANNEL_LINK = "https://t.me/eroticx2"
 
 if not BOT_TOKEN or not OWNER_CHAT_ID:
     print("❌ لطفاً فایل .env رو پر کنید!")
@@ -30,20 +31,79 @@ def save_messages(messages):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    markup.add(
+        types.InlineKeyboardButton("📢 کانال ما", url=CHANNEL_LINK),
+        types.InlineKeyboardButton("💬 راهنما", callback_data="help")
+    )
+    markup.add(
+        types.InlineKeyboardButton("📷 ارسال عکس", callback_data="send_photo"),
+        types.InlineKeyboardButton("🎥 ارسال ویدیو", callback_data="send_video")
+    )
+    markup.add(
+        types.InlineKeyboardButton("📝 ارسال متن", callback_data="send_text"),
+        types.InlineKeyboardButton("📎 ارسال فایل", callback_data="send_file")
+    )
+    
     welcome_text = (
         "سلام عزیزم 👋❤️\n\n"
         "من الهام هستم و ادمین کانال Eroticx🔥\n\n"
         "ازین به بعد از طریق این بات میتونید به صورت کاملاً ناشناس "
         "عکس و ویدیو هاتون رو ارسال کنید.\n\n"
-        "📝 میتونید هم متن بنویسید\n"
-        "📷 عکس بفرستید\n"
-        "🎥 ویدیو بفرستید\n"
-        "📎 فایل بفرستید\n"
-        "🎤 صدا بفرستید\n\n"
         "🔒 هویت شما کاملاً محفوظه!\n\n"
-        "هرچی می‌خواید بفرستید 👇"
+        "یکی از گزینه‌های زیر رو انتخاب کنید 👇"
     )
-    bot.reply_to(message, welcome_text)
+    bot.send_message(message.chat.id, welcome_text, reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: True)
+def handle_callback(call):
+    if call.data == "help":
+        help_text = (
+            "📚 راهنما:\n\n"
+            "🔹 عکس بفرستید → فوروارد میشه\n"
+            "🔹 ویدیو بفرستید → فوروارد میشه\n"
+            "🔹 متن بنویسید → فوروارد میشه\n"
+            "🔹 فایل بفرستید → فوروارد میشه\n"
+            "🔹 صدا بفرستید → فوروارد میشه\n"
+            "🔹 استیکر بفرستید → فوروارد میشه\n\n"
+            "🔒 هویت شما هیچوقت فاش نمیشه!\n\n"
+            "📌 از منوی زیر شروع کنید 👇"
+        )
+        bot.answer_callback_query(call.id, "✅ راهنما")
+        bot.send_message(call.message.chat.id, help_text)
+    
+    elif call.data == "send_photo":
+        bot.answer_callback_query(call.id, "✅ عکست رو بفرست")
+        bot.send_message(call.message.chat.id, "📷 عکست رو اینجا بفرست:")
+    
+    elif call.data == "send_video":
+        bot.answer_callback_query(call.id, "✅ ویدیوت رو بفرست")
+        bot.send_message(call.message.chat.id, "🎥 ویدیوت رو اینجا بفرست:")
+    
+    elif call.data == "send_text":
+        bot.answer_callback_query(call.id, "✅ متنت رو بنویس")
+        bot.send_message(call.message.chat.id, "📝 متنت رو اینجا بنویس:")
+    
+    elif call.data == "send_file":
+        bot.answer_callback_query(call.id, "✅ فایلت رو بفرست")
+        bot.send_message(call.message.chat.id, "📎 فایلت رو اینجا بفرست:")
+    
+    elif call.data == "back_to_menu":
+        bot.answer_callback_query(call.id, "✅ برگشتی")
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        markup.add(
+            types.InlineKeyboardButton("📢 کانال ما", url=CHANNEL_LINK),
+            types.InlineKeyboardButton("💬 راهنما", callback_data="help")
+        )
+        markup.add(
+            types.InlineKeyboardButton("📷 ارسال عکس", callback_data="send_photo"),
+            types.InlineKeyboardButton("🎥 ارسال ویدیو", callback_data="send_video")
+        )
+        markup.add(
+            types.InlineKeyboardButton("📝 ارسال متن", callback_data="send_text"),
+            types.InlineKeyboardButton("📎 ارسال فایل", callback_data="send_file")
+        )
+        bot.send_message(call.message.chat.id, "منوی اصلی 👇", reply_markup=markup)
 
 @bot.message_handler(content_types=['photo'])
 def handle_photo(message):
@@ -70,7 +130,10 @@ def handle_photo(message):
         f"🆔 آیدی: {message.from_user.id}")
     
     bot.forward_message(OWNER_CHAT_ID, message.chat.id, message.message_id)
-    bot.reply_to(message, "✅ عکس شما ارسال شد!")
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("🔙 بازگشت به منو", callback_data="back_to_menu"))
+    bot.send_message(message.chat.id, "✅ عکس شما ارسال شد!", reply_markup=markup)
 
 @bot.message_handler(content_types=['document'])
 def handle_document(message):
@@ -99,7 +162,10 @@ def handle_document(message):
         f"📄 نام فایل: {message.document.file_name}")
     
     bot.forward_message(OWNER_CHAT_ID, message.chat.id, message.message_id)
-    bot.reply_to(message, "✅ فایل شما ارسال شد!")
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("🔙 بازگشت به منو", callback_data="back_to_menu"))
+    bot.send_message(message.chat.id, "✅ فایل شما ارسال شد!", reply_markup=markup)
 
 @bot.message_handler(content_types=['video'])
 def handle_video(message):
@@ -126,7 +192,10 @@ def handle_video(message):
         f"🆔 آیدی: {message.from_user.id}")
     
     bot.forward_message(OWNER_CHAT_ID, message.chat.id, message.message_id)
-    bot.reply_to(message, "✅ ویدیو شما ارسال شد!")
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("🔙 بازگشت به منو", callback_data="back_to_menu"))
+    bot.send_message(message.chat.id, "✅ ویدیو شما ارسال شد!", reply_markup=markup)
 
 @bot.message_handler(content_types=['voice'])
 def handle_voice(message):
@@ -153,7 +222,10 @@ def handle_voice(message):
         f"🆔 آیدی: {message.from_user.id}")
     
     bot.forward_message(OWNER_CHAT_ID, message.chat.id, message.message_id)
-    bot.reply_to(message, "✅ صدای شما ارسال شد!")
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("🔙 بازگشت به منو", callback_data="back_to_menu"))
+    bot.send_message(message.chat.id, "✅ صدای شما ارسال شد!", reply_markup=markup)
 
 @bot.message_handler(content_types=['sticker'])
 def handle_sticker(message):
@@ -180,7 +252,10 @@ def handle_sticker(message):
         f"🆔 آیدی: {message.from_user.id}")
     
     bot.forward_message(OWNER_CHAT_ID, message.chat.id, message.message_id)
-    bot.reply_to(message, "✅ استیکر شما ارسال شد!")
+    
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("🔙 بازگشت به منو", callback_data="back_to_menu"))
+    bot.send_message(message.chat.id, "✅ استیکر شما ارسال شد!", reply_markup=markup)
 
 @bot.message_handler(content_types=['text'])
 def handle_message(message):
@@ -207,7 +282,9 @@ def handle_message(message):
         f"🆔 آیدی: {message.from_user.id}\n"
         f"📝 پیام:\n{message.text}")
     
-    bot.reply_to(message, "✅ پیام شما ارسال شد!")
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("🔙 بازگشت به منو", callback_data="back_to_menu"))
+    bot.send_message(message.chat.id, "✅ پیام شما ارسال شد!", reply_markup=markup)
 
 @bot.message_handler(commands=['messages'])
 def show_messages(message):
