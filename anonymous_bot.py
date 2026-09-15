@@ -251,6 +251,25 @@ def handle_sticker(message):
     markup.add(types.InlineKeyboardButton("🔙 بازگشت به منو", callback_data="back_to_menu"))
     bot.send_message(message.chat.id, "✅ استیکر شما ارسال شد!", reply_markup=markup)
 
+@bot.message_handler(commands=['reply'])
+def reply_to_user(message):
+    if str(message.chat.id) != OWNER_CHAT_ID:
+        bot.reply_to(message, "⛔ شما دسترسی به این بخش ندارید.")
+        return
+    parts = message.text.split(maxsplit=2)
+    if len(parts) < 3:
+        bot.reply_to(message, " usage: /reply <user_id> <message>\nمثال: /reply 123456 سلام، پیامت رسید!")
+        return
+    try:
+        user_id = int(parts[1])
+        reply_text = parts[2]
+        bot.send_message(user_id, f"📩 پاسخ ادمین:\n\n{reply_text}")
+        bot.reply_to(message, f"✅ پاسخ به کاربر {user_id} ارسال شد.")
+    except ValueError:
+        bot.reply_to(message, "❌ آیدی کاربر نامعتبر است.")
+    except Exception:
+        bot.reply_to(message, "❌ خطا در ارسال پیام. مطمئن شوید کاربر قبلاً پیامی ارسال کرده.")
+
 @bot.message_handler(content_types=['text'])
 def handle_message(message):
     if str(message.chat.id) == OWNER_CHAT_ID:
@@ -296,25 +315,6 @@ def show_messages(message):
             f"   {msg['message']}\n\n"
         )
     bot.reply_to(message, response)
-
-@bot.message_handler(commands=['reply'])
-def reply_to_user(message):
-    if str(message.chat.id) != OWNER_CHAT_ID:
-        bot.reply_to(message, "⛔ شما دسترسی به این بخش ندارید.")
-        return
-    parts = message.text.split(maxsplit=2)
-    if len(parts) < 3:
-        bot.reply_to(message, " usage: /reply <user_id> <message>\nمثال: /reply 123456 سلام، پیامت رسید!")
-        return
-    try:
-        user_id = int(parts[1])
-        reply_text = parts[2]
-        bot.send_message(user_id, f"📩 پاسخ ادمین:\n\n{reply_text}")
-        bot.reply_to(message, f"✅ پاسخ به کاربر {user_id} ارسال شد.")
-    except ValueError:
-        bot.reply_to(message, "❌ آیدی کاربر نامعتبر است.")
-    except Exception:
-        bot.reply_to(message, "❌ خطا در ارسال پیام. مطمئن شوید کاربر قبلاً پیامی ارسال کرده.")
 
 if __name__ == "__main__":
     import sys, io
